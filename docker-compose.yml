@@ -1,0 +1,74 @@
+services:
+  grpc.service:
+    image: ${DOCKER_NAMESPACE-}grpc.service:${VERSION}
+    build:
+      context: .
+      dockerfile: Grpc.Service/Dockerfile
+      args:
+        - AUTHORS=${AUTHORS}
+        - VERSION=${VERSION}
+        - TITLE=${TITLE}
+        - DESCRIPTION=${DESCRIPTION}
+    ports:
+      - 9019:8080
+      - 9020:8081
+    healthcheck:
+      # This command runs inside the container to check the gRPC endpoint
+      test: ["CMD-SHELL", "/usr/local/bin/grpc_health_probe", "-tls -tls-no-verify -addr=localhost:8081"] 
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - grpc.service.network
+    depends_on:
+      grpc.service.sqlserver:
+        condition: service_healthy
+      seq:
+        condition: service_started 
+    volumes:
+      - grpc_service_logs:/app/logs/grpc/
+ 
+  grpc.service.sqlserver:
+    image: mcr.microsoft.com/mssql/server@sha256:db9a8fe3098b7e8bbde41106bdc7caee942e97124e5fdb71b872ca208de3092d
+    container_name: grpc.service.sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    env_file:
+      - ./.env
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -U sa -P \"${MSSQL_SA_PASSWORD}\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    ports:
+      - 1436:1433
+    networks:
+      - grpc.service.network
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+  seq:
+    image: datalust/seq@sha256:3cfad751637b869617ff7fc296495681f5365a8c3046b36ab654a0f5a8ff04e5
+    ports:
+      - 5341:5341
+      - 8081:80
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINPASSWORD=${SEQ_FIRSTRUN_ADMINPASSWORD}
+    networks:
+      - grpc.service.network 
+    volumes:
+      - seq_data:/data
+    restart: unless-stopped
+
+networks:
+  grpc.service.network:
+    driver: bridge
+
+volumes:
+  mssql_data:
+  grpc_service_logs:
+  seq_data:

@@ -1,0 +1,36 @@
+﻿<Project Sdk="MSBuild.Sdk.SqlProj/3.3.0">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <SqlServerVersion>Sql160</SqlServerVersion>
+
+    <!-- Dacpac metadata -->
+    <DacApplicationName>Grpc.Database</DacApplicationName>
+    <DacVersion>1.0.0.0</DacVersion>
+
+    <RootNamespace>Grpc.Database</RootNamespace>
+    <AssemblyName>Grpc.Database</AssemblyName>
+    <ModelCollation>1033,CI</ModelCollation>
+    <DefaultCollation>SQL_Latin1_General_CP1_CI_AS</DefaultCollation>
+    <DefaultFilegroup>PRIMARY</DefaultFilegroup>
+    <RunSqlCodeAnalysis>True</RunSqlCodeAnalysis>
+    <TreatTSqlWarningsAsErrors>True</TreatTSqlWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>SRD0003,SRD0004</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="ErikEJ.DacFX.SqlServer.Rules">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="ErikEJ.DacFX.TSQLSmellSCA">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" />
+  </ItemGroup>
+</Project>
+
+

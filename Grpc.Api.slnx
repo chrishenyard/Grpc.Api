@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".env" />
+    <File Path="Build-Database.ps1" />
+    <File Path="Directory.Packages.props" />
+    <File Path="Docker-Compose-Down.ps1" />
+    <File Path="Docker-Compose-Up.ps1" />
+    <File Path="LICENSE.md" />
+    <File Path="Publish-Database.ps1" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+  <Project Path="Grpc.Common/Grpc.Common.csproj" Id="4d9478e0-d755-4a11-9d92-85015e04568e" />
+  <Project Path="Grpc.Data/Grpc.Data.csproj" Id="709c9f7b-2684-4a7f-b423-b2684426fa81" />
+  <Project Path="Grpc.Database/Grpc.Database.csproj" Id="ffa1368a-457e-4dc7-b4be-c5446aa7ab2c">
+    <Deploy />
+  </Project>
+  <Project Path="Grpc.Service/Grpc.Service.csproj" />
+</Solution>
