@@ -4,7 +4,6 @@ using Grpc.Service.Configuration;
 using Grpc.Service.Health;
 using Grpc.Service.Interceptors;
 using Grpc.Service.Services;
-using Grpc.Service.Settings;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,8 +19,6 @@ builder
     .AddSettings();
 
 var configuration = builder.Configuration;
-var seqSettings = configuration.GetSection("SeqSettings")
-    .Get<SeqSettings>()!;
 
 builder.Services
     .AddTelemetry(configuration)
