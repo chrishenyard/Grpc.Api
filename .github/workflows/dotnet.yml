@@ -21,7 +21,7 @@ jobs:
       with:
         dotnet-version: 10.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run:  dotnet restore ./Grpc.Api.slnx
     - name: Build
       run: dotnet build ./Grpc.Api.slnx --no-restore
 
