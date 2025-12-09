@@ -62,4 +62,4 @@ if (app.Environment.IsDevelopment())
 
 EndPoints.Map(app);
 
-app.Run();
+await app.RunAsync();
