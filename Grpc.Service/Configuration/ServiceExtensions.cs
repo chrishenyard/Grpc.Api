@@ -60,7 +60,8 @@ public static class ServiceExtensions
     {
         builder.Services.AddOptions<EntityFrameworkSettings>()
             .Bind(builder.Configuration.GetSection(EntityFrameworkSettings.Section))
-            .ValidateDataAnnotations();
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         return builder;
     }
