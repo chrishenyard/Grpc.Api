@@ -10,7 +10,6 @@ services:
         - TITLE=${TITLE}
         - DESCRIPTION=${DESCRIPTION}
     ports:
-      - 9019:8080
       - 9020:8081
     healthcheck:
       # This command runs inside the container to check the gRPC endpoint
