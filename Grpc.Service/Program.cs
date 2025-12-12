@@ -8,11 +8,21 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog((context, configuration) =>
+builder.WebHost.UseKestrel(builder =>
 {
-    configuration
-        .ReadFrom.Configuration(context.Configuration);
+    builder.AddServerHeader = false;
 });
+
+builder.Host
+    .UseDefaultServiceProvider((context, options) =>
+    {
+        options.ValidateOnBuild = true;
+    })
+    .UseSerilog((context, configuration) =>
+    {
+        configuration
+            .ReadFrom.Configuration(context.Configuration);
+    });
 
 builder
     .AddConfiguration()
