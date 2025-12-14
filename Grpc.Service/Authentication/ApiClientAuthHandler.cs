@@ -60,7 +60,6 @@ public class ApiClientAuthHandler(
 
         var requestTime = DateTimeOffset.FromUnixTimeSeconds(tsSeconds);
         var now = DateTimeOffset.UtcNow;
-
         if (now - requestTime > AllowedSkew || requestTime - now > AllowedSkew)
         {
             _logger.LogInformation("Expired request. Request time: {RequestTime}, Now: {Now}", requestTime, now);
@@ -68,18 +67,16 @@ public class ApiClientAuthHandler(
         }
 
         var apiClientSecretDto = await _repository.GetCurrentSecretAsync(apiKey, httpContext.RequestAborted);
-
         if (apiClientSecretDto == null)
         {
-            _logger.LogInformation("API key not found: {ApiKey}", apiKey);
+            _logger.LogInformation("API key not found or inactive: {ApiKey}", apiKey);
             return AuthenticateResult.Fail(InvalidAuthenticationMessage);
         }
 
-        var apiClientDto = await _repository.GetClientByApiKeyAsync(apiKey, httpContext.RequestAborted);
-
-        if (apiClientDto == null || !apiClientDto.IsActive)
+        var apiSecretHash = SecurityHelper.ComputeSecretHash(apiSecret, apiClientSecretDto.Salt);
+        if (!string.Equals(apiSecretHash, apiClientSecretDto.Secret, StringComparison.OrdinalIgnoreCase))
         {
-            _logger.LogInformation("API client not found or inactive for API key: {ApiKey}", apiKey);
+            _logger.LogInformation("Invalid API secret for API key: {ApiKey}", apiKey);
             return AuthenticateResult.Fail(InvalidAuthenticationMessage);
         }
 
@@ -93,12 +90,13 @@ public class ApiClientAuthHandler(
             return AuthenticateResult.Fail(InvalidAuthenticationMessage);
         }
 
-        var apiClientGroups = await _repository.GetApiClientGroupsAsync(apiClientDto.ApiClientId, httpContext.RequestAborted);
+        var apiClientId = apiClientSecretDto.ApiClientId;
+        var apiClientGroups = await _repository.GetApiClientGroupsAsync(apiClientId, httpContext.RequestAborted);
         var groupNames = apiClientGroups.Select(g => g.GroupName).ToList();
 
         var claims = new List<Claim>
         {
-            new("api-client-id", apiClientDto.ApiClientId.ToString()),
+            new("api-client-id", apiClientId.ToString()),
             new("api-client-groups", string.Join(",", groupNames)),
             new (ClaimTypes.Name, apiKey)
         };

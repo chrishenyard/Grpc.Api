@@ -91,18 +91,15 @@ public class ApiClientRepository(GrpcDbContext grpcDbContext) : IApiClientReposi
     {
         ArgumentException.ThrowIfNullOrEmpty(apiKey, nameof(apiKey));
 
-        var client = await _grpcDbContext.ApiClients
-            .Where(c => c.ApiKey == apiKey && c.IsActive)
-            .Select(c => new
-            {
-                Secrets = c.ApiClientSecrets
-                    .Where(s => s.IsCurrent && (s.ExpiresUtc == null || s.ExpiresUtc > DateTime.UtcNow))
-                    .OrderByDescending(s => s.CreatedUtc)
-                    .FirstOrDefault()
-            })
+        var apiClientSecret = await _grpcDbContext.ApiClientSecrets
+            .Include(s => s.ApiClient)
+            .Where(s => s.ApiClient.ApiKey == apiKey
+                        && s.ApiClient.IsActive
+                        && s.IsCurrent
+                        && (s.ExpiresUtc == null || s.ExpiresUtc > DateTime.UtcNow))
+            .OrderByDescending(s => s.CreatedUtc)
             .FirstOrDefaultAsync(token);
 
-        var apiClientSecret = client?.Secrets;
         return apiClientSecret?.ToApiClientSecretDto();
     }
 }
