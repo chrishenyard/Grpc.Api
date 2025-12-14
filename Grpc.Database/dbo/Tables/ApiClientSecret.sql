@@ -17,11 +17,14 @@ ALTER TABLE [dbo].[ApiClientSecret]
     ADD CONSTRAINT [DF_ApiClientSecret_ApiClientSecretId] DEFAULT NEWSEQUENTIALID() FOR [ApiClientSecretId];
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [UX_ApiClientSecret_ApiClientId]
+ALTER TABLE [dbo].[ApiClientSecret]
+    ADD CONSTRAINT [DF_ApiClientSecret_ApiClientId_ExpiresUtc] UNIQUE([ApiClientId], [ExpiresUtc]);
+GO
+
+CREATE NONCLUSTERED INDEX [IX_ApiClientSecret_ApiClientId]
     ON [dbo].[ApiClientSecret]([ApiClientId] ASC);
 GO
 
 CREATE UNIQUE CLUSTERED INDEX [UX_ApiClientSecret_ApiClientSecretInternalId] 
     ON [dbo].[ApiClientSecret]([ApiClientSecretInternalId] ASC);
 GO
-

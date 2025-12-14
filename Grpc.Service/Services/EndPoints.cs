@@ -30,8 +30,6 @@ public class EndPoints
             var stringToSign = $"{rpcMethod}:{timestamp}";
 
             var signature = SecurityHelper.ComputeHmacSha512(secret, stringToSign);
-            var apiClientSecretDto = await apiClientRepository.GetCurrentSecretAsync(apiKey, token);
-            var secretHash = SecurityHelper.ComputeSecretHash(secret, apiClientSecretDto!.Salt);
 
             var headers = new Dictionary<string, string>
             {

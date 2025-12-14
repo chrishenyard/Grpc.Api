@@ -87,19 +87,21 @@ public class ApiClientRepository(GrpcDbContext grpcDbContext) : IApiClientReposi
         return apiClient?.ToApiClientDto();
     }
 
-    public async Task<ApiClientSecretDto?> GetCurrentSecretAsync(string apiKey, CancellationToken token)
+    public async Task<List<ApiClientSecretDto>> GetCurrentSecretAsync(string apiKey, CancellationToken token)
     {
         ArgumentException.ThrowIfNullOrEmpty(apiKey, nameof(apiKey));
 
-        var apiClientSecret = await _grpcDbContext.ApiClientSecrets
+        var apiClientSecrets = await _grpcDbContext.ApiClientSecrets
             .Include(s => s.ApiClient)
             .Where(s => s.ApiClient.ApiKey == apiKey
                         && s.ApiClient.IsActive
-                        && s.IsCurrent
                         && (s.ExpiresUtc == null || s.ExpiresUtc > DateTime.UtcNow))
-            .OrderByDescending(s => s.CreatedUtc)
-            .FirstOrDefaultAsync(token);
+            .ToListAsync(token);
 
-        return apiClientSecret?.ToApiClientSecretDto();
+        var dtos = apiClientSecrets
+            .Select(s => s.ToApiClientSecretDto())
+            .ToList();
+
+        return dtos;
     }
 }

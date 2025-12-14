@@ -17,8 +17,6 @@ public class ApiClientSecret
     [Column(TypeName = "nvarchar(200)")]
     public required string Secret { get; set; }
 
-    public bool IsCurrent { get; set; } = true;
-
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
     public DateTime? ExpiresUtc { get; set; }
@@ -33,13 +31,12 @@ public sealed record ApiClientSecretDto
     public Guid ApiClientId { get; init; }
     public string Salt { get; init; } = string.Empty;
     public string Secret { get; init; } = string.Empty;
-    public bool IsCurrent { get; init; }
     public DateTime CreatedUtc { get; init; }
     public DateTime? ExpiresUtc { get; init; }
 
     private ApiClientSecretDto() { }
 
-    private ApiClientSecretDto(Guid apiClientSecretId, Guid apiClientId, string salt, string secret, bool isCurrent, DateTime createdUtc, DateTime? expiresUtc)
+    private ApiClientSecretDto(Guid apiClientSecretId, Guid apiClientId, string salt, string secret, DateTime createdUtc, DateTime? expiresUtc)
     {
         ValidateOrThrow(apiClientSecretId, apiClientId, salt, secret, createdUtc, expiresUtc);
 
@@ -47,19 +44,17 @@ public sealed record ApiClientSecretDto
         ApiClientId = apiClientId;
         Salt = salt;
         Secret = secret;
-        IsCurrent = isCurrent;
         CreatedUtc = createdUtc;
         ExpiresUtc = expiresUtc;
     }
 
-    private ApiClientSecretDto(Guid apiClientId, string salt, string secret, bool isCurrent, DateTime createdUtc, DateTime? expiresUtc)
+    private ApiClientSecretDto(Guid apiClientId, string salt, string secret, DateTime createdUtc, DateTime? expiresUtc)
     {
         ValidateOrThrow(apiClientId, salt, secret, createdUtc, expiresUtc);
 
         ApiClientId = apiClientId;
         Salt = salt;
         Secret = secret;
-        IsCurrent = isCurrent;
         CreatedUtc = createdUtc;
         ExpiresUtc = expiresUtc;
     }
@@ -69,7 +64,6 @@ public sealed record ApiClientSecretDto
             apiClientId,
             salt,
             secret,
-            true,
             DateTime.UtcNow,
             null);
 
@@ -79,12 +73,11 @@ public sealed record ApiClientSecretDto
             apiClientId,
             salt,
             secret,
-            true,
             DateTime.UtcNow,
             null);
 
     public static implicit operator ApiClientSecretDto(ApiClientSecret entity)
-        => new(entity.ApiClientSecretId, entity.ApiClientId, entity.Salt, entity.Secret, entity.IsCurrent, entity.CreatedUtc, entity.ExpiresUtc);
+        => new(entity.ApiClientSecretId, entity.ApiClientId, entity.Salt, entity.Secret, entity.CreatedUtc, entity.ExpiresUtc);
 
     public static implicit operator ApiClientSecret(ApiClientSecretDto dto)
         => new()
@@ -93,7 +86,6 @@ public sealed record ApiClientSecretDto
             ApiClientId = dto.ApiClientId,
             Salt = dto.Salt,
             Secret = dto.Secret,
-            IsCurrent = dto.IsCurrent,
             CreatedUtc = dto.CreatedUtc,
             ExpiresUtc = dto.ExpiresUtc
         };

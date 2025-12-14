@@ -66,17 +66,10 @@ public class ApiClientAuthHandler(
             return AuthenticateResult.Fail(InvalidAuthenticationMessage);
         }
 
-        var apiClientSecretDto = await _repository.GetCurrentSecretAsync(apiKey, httpContext.RequestAborted);
+        var apiClientSecretDto = await GetValidApiClientSecretAsync(apiKey, apiSecret, httpContext.RequestAborted);
         if (apiClientSecretDto == null)
         {
             _logger.LogInformation("API key not found or inactive: {ApiKey}", apiKey);
-            return AuthenticateResult.Fail(InvalidAuthenticationMessage);
-        }
-
-        var apiSecretHash = SecurityHelper.ComputeSecretHash(apiSecret, apiClientSecretDto.Salt);
-        if (!string.Equals(apiSecretHash, apiClientSecretDto.Secret, StringComparison.OrdinalIgnoreCase))
-        {
-            _logger.LogInformation("Invalid API secret for API key: {ApiKey}", apiKey);
             return AuthenticateResult.Fail(InvalidAuthenticationMessage);
         }
 
@@ -106,6 +99,26 @@ public class ApiClientAuthHandler(
         var ticket = new AuthenticationTicket(principal, SchemeName);
 
         return AuthenticateResult.Success(ticket);
+    }
+
+    private async Task<Data.Entities.ApiClientSecretDto?> GetValidApiClientSecretAsync(string apiKey, string apiSecret, CancellationToken cancellationToken)
+    {
+        var apiClientSecretDtos = await _repository.GetCurrentSecretAsync(apiKey, cancellationToken);
+        if (apiClientSecretDtos.Count == 0)
+        {
+            return null;
+        }
+
+        foreach (var dto in apiClientSecretDtos)
+        {
+            var computedHash = SecurityHelper.ComputeSecretHash(apiSecret, dto.Salt);
+            if (string.Equals(computedHash, dto.Secret, StringComparison.OrdinalIgnoreCase))
+            {
+                return dto;
+            }
+        }
+
+        return null;
     }
 
     private (bool flowControl, AuthenticateResult? value) TryGetApiCredentialsFromHeaders(out string apiKey, out string apiSecret, out string timestamp, out string signature)
