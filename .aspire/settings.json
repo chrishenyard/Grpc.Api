@@ -1,7 +1,0 @@
-{
-  "features": {
-    "singlefileAppHostEnabled": "true",
-    "minimumSdkCheckEnabled": "false",
-    "execCommandEnabled": "true"
-  }
-}
