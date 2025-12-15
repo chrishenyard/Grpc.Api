@@ -75,7 +75,7 @@ public class ApiClientAuthHandler(
 
         var rpcMethod = GetRpcMethodFromRequest(Context);
         var stringToSign = $"{rpcMethod}:{timestamp}";
-        var expectedSignature = SecurityHelper.ComputeHmacSha512(apiSecret, stringToSign);
+        var expectedSignature = SecurityHelper.ComputeHmacSha256(apiSecret, stringToSign);
 
         if (!string.Equals(expectedSignature, signature, StringComparison.OrdinalIgnoreCase))
         {

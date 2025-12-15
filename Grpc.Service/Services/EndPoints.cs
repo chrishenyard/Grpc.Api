@@ -29,7 +29,7 @@ public class EndPoints
             var rpcMethod = $"/grpc.jobs.v1.Jobs/{method}";
             var stringToSign = $"{rpcMethod}:{timestamp}";
 
-            var signature = SecurityHelper.ComputeHmacSha512(secret, stringToSign);
+            var signature = SecurityHelper.ComputeHmacSha256(secret, stringToSign);
 
             var headers = new Dictionary<string, string>
             {

@@ -5,14 +5,14 @@ namespace Grpc.Common.Utilities;
 
 public static class SecurityHelper
 {
-    private const int KeySize = 512 / 8;
+    private const int KeySize = 256 / 8;
 
-    public static string ComputeHmacSha512(string secret, string data)
+    public static string ComputeHmacSha256(string secret, string data)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(secret, nameof(secret));
         ArgumentNullException.ThrowIfNullOrEmpty(data, nameof(data));
 
-        using var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(secret));
+        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
         var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
@@ -32,7 +32,7 @@ public static class SecurityHelper
 
         var passwordBytes = Encoding.UTF8.GetBytes(password);
         var saltBytes = Convert.FromBase64String(salt);
-        var hash = Rfc2898DeriveBytes.Pbkdf2(passwordBytes, saltBytes, iterations, HashAlgorithmName.SHA512, KeySize);
+        var hash = Rfc2898DeriveBytes.Pbkdf2(passwordBytes, saltBytes, iterations, HashAlgorithmName.SHA256, KeySize);
         return Convert.ToBase64String(hash);
     }
 }
