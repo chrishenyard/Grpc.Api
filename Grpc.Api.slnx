@@ -12,10 +12,10 @@
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
-  <Project Path="Grpc.Common/Grpc.Common.csproj" Id="4d9478e0-d755-4a11-9d92-85015e04568e" />
-  <Project Path="Grpc.Data/Grpc.Data.csproj" Id="709c9f7b-2684-4a7f-b423-b2684426fa81" />
-  <Project Path="Grpc.Database/Grpc.Database.csproj" Id="ffa1368a-457e-4dc7-b4be-c5446aa7ab2c">
+  <Project Path="server/Grpc.Common/Grpc.Common.csproj" Id="4d9478e0-d755-4a11-9d92-85015e04568e" />
+  <Project Path="server/Grpc.Data/Grpc.Data.csproj" Id="709c9f7b-2684-4a7f-b423-b2684426fa81" />
+  <Project Path="server/Grpc.Database/Grpc.Database.csproj" Id="ffa1368a-457e-4dc7-b4be-c5446aa7ab2c">
     <Deploy />
   </Project>
-  <Project Path="Grpc.Service/Grpc.Service.csproj" />
+  <Project Path="server/Grpc.Service/Grpc.Service.csproj" />
 </Solution>
