@@ -4,7 +4,6 @@
     [ApiClientId]       UNIQUEIDENTIFIER NOT NULL,
     [Salt]              NVARCHAR (100)   NOT NULL,
     [Secret]            NVARCHAR (200)   NOT NULL,
-    [IsCurrent]         BIT              NOT NULL,
     [CreatedUtc]        DATETIME2 (7)    NOT NULL,
     [ExpiresUtc]        DATETIME2 (7)    NULL,
     CONSTRAINT [PK_ApiClientSecret] PRIMARY KEY NONCLUSTERED ([ApiClientSecretId] ASC),
