@@ -28,9 +28,9 @@ FROM mcr.microsoft.com/dotnet/sdk@sha256:c7445f141c04f1a6b454181bd098dcfa606c61b
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Directory.Packages.props", "."]
-COPY ["server/Grpc.Service/Grpc.Service.csproj", "Grpc.Service/"]
-COPY ["server/Grpc.Common/Grpc.Common.csproj", "Grpc.Common/"]
-COPY ["server/Grpc.Data/Grpc.Data.csproj", "Grpc.Data/"]
+COPY ["Grpc.Service/Grpc.Service.csproj", "Grpc.Service/"]
+COPY ["Grpc.Common/Grpc.Common.csproj", "Grpc.Common/"]
+COPY ["Grpc.Data/Grpc.Data.csproj", "Grpc.Data/"]
 RUN dotnet restore "./Grpc.Service/Grpc.Service.csproj"
 COPY . .
 WORKDIR "/src/Grpc.Service"
