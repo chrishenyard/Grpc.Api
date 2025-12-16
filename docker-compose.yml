@@ -2,7 +2,7 @@ services:
   grpc.service:
     image: ${DOCKER_NAMESPACE-}grpc.service:${VERSION}
     build:
-      context: .
+      context: ./server
       dockerfile: Grpc.Service/Dockerfile
       args:
         - AUTHORS=${AUTHORS}

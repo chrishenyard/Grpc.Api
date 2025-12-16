@@ -27,13 +27,13 @@ ARG BUILD_DATE
 FROM mcr.microsoft.com/dotnet/sdk@sha256:c7445f141c04f1a6b454181bd098dcfa606c61ba0bd213d0a702489e5bd4cd71 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["server/Directory.Packages.props", "."]
+COPY ["Directory.Packages.props", "."]
 COPY ["server/Grpc.Service/Grpc.Service.csproj", "Grpc.Service/"]
 COPY ["server/Grpc.Common/Grpc.Common.csproj", "Grpc.Common/"]
 COPY ["server/Grpc.Data/Grpc.Data.csproj", "Grpc.Data/"]
 RUN dotnet restore "./Grpc.Service/Grpc.Service.csproj"
 COPY . .
-WORKDIR "/src/server/Grpc.Service"
+WORKDIR "/src/Grpc.Service"
 RUN dotnet build "./Grpc.Service.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
