@@ -50,6 +50,6 @@ LABEL \
     org.opencontainers.image.title="${TITLE}" \
     org.opencontainers.image.description="${DESCRIPTION}" \
     org.opencontainers.image.version="${VERSION}" \
-    org.opencontainers.image.licenses="MIT"
+    org.opencontainers.image.licenses="Apache-2.0"
 
 ENTRYPOINT ["dotnet", "Grpc.Service.dll"]
