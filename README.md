@@ -56,6 +56,18 @@ From repository root:
   - Publish the database project to ensure the latest migrations are applied.
   - Run the gRPC service project in Docker.
 
+How to test
+---------------
+- Use a gRPC client (e.g., `grpcurl`, Postman, or a custom .NET client) to call the `Jobs` service methods.
+- Example `grpcurl` command to list jobs:
+  ```
+  grpcurl -plaintext -d '{}' localhost:5000 jobs.Jobs/ListJobs
+  ```
+- Run unit/integration tests via the `Grpc.Service.Client` project in the solution root.
+- Check logs for OpenTelemetry traces and metrics output.
+- Use health check endpoints (`/health/live` and `/health/ready`) to verify service liveness and readiness.
+- Use `grpc_health_probe` for gRPC health checks if running in Docker/Kubernetes.
+
 Notes for developers
 --------------------
 - Protobuf codegen: MSBuild generates server stubs automatically via the `Protobuf` item in `Grpc.Service.csproj`.

@@ -369,3 +369,5 @@ seq/*
 /mssql/grpc/data/Entropy.bin
 /mssql/grpc/secrets/machine-key
 /.env
+/server/Grpc.Service.Client/.env
+/server/Grpc.Service.Client/test-results.xml

@@ -17,5 +17,6 @@
   <Project Path="server/Grpc.Database/Grpc.Database.csproj" Id="ffa1368a-457e-4dc7-b4be-c5446aa7ab2c">
     <Deploy />
   </Project>
+  <Project Path="server/Grpc.Service.Client/Grpc.Service.Client.csproj" Id="203e7e43-86d7-47f1-9948-8593b614d894" />
   <Project Path="server/Grpc.Service/Grpc.Service.csproj" />
 </Solution>
