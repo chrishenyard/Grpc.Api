@@ -19,7 +19,7 @@ services:
       retries: 3
       start_period: 15s
     networks:
-      - grpc.service.network
+      - grpc_service_network
     depends_on:
       grpc.service.sqlserver:
         condition: service_healthy
@@ -27,6 +27,15 @@ services:
         condition: service_started 
     volumes:
       - grpc_service_logs:/app/logs/grpc/
+  
+  grpc.region.redis:
+    image: redis@sha256:6cbef353e480a8a6e7f10ec545f13d7d3fa85a212cdcc5ffaf5a1c818b9d3798
+    ports:
+      - "6379:6379"
+    networks:
+      - grpc_service_network
+    volumes:
+      - grpc_redis_data:/data
  
   grpc.service.sqlserver:
     image: mcr.microsoft.com/mssql/server@sha256:db9a8fe3098b7e8bbde41106bdc7caee942e97124e5fdb71b872ca208de3092d
@@ -45,7 +54,7 @@ services:
     ports:
       - 1436:1433
     networks:
-      - grpc.service.network
+      - grpc_service_network
     volumes:
       - mssql_data:/var/opt/mssql
 
@@ -58,16 +67,17 @@ services:
       - ACCEPT_EULA=Y
       - SEQ_FIRSTRUN_ADMINPASSWORD=${SEQ_FIRSTRUN_ADMINPASSWORD}
     networks:
-      - grpc.service.network 
+      - grpc_service_network 
     volumes:
       - seq_data:/data
     restart: unless-stopped
 
 networks:
-  grpc.service.network:
+  grpc_service_network:
     driver: bridge
 
 volumes:
   mssql_data:
   grpc_service_logs:
   seq_data:
+  grpc_redis_data:

@@ -6,6 +6,7 @@ using Grpc.Service.Authorization;
 using Grpc.Service.DataInitializer;
 using Grpc.Service.Settings;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
@@ -131,6 +132,26 @@ public static class ServiceExtensions
                     options.Protocol = OtlpExportProtocol.HttpProtobuf;
                     options.Headers = $"X-Seq-ApiKey={seqSettings.ApiKey}";
                 }));
+
+        return services;
+    }
+    public static IServiceCollection AddCaching(this IServiceCollection services, IConfiguration config)
+    {
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = config.GetConnectionString("Redis");
+        });
+
+        services.AddHybridCache(options =>
+        {
+            options.MaximumPayloadBytes = 1024 * 1024 * 10;
+            options.MaximumKeyLength = 250;
+            options.DefaultEntryOptions = new HybridCacheEntryOptions
+            {
+                LocalCacheExpiration = TimeSpan.FromMinutes(5),
+                Expiration = TimeSpan.FromMinutes(5)
+            };
+        });
 
         return services;
     }
