@@ -21,14 +21,16 @@ services:
     networks:
       - grpc_service_network
     depends_on:
-      grpc.service.sqlserver:
+      mssql:
         condition: service_healthy
       seq:
-        condition: service_started 
+        condition: service_started
+      redis:
+        condition: service_started
     volumes:
       - grpc_service_logs:/app/logs/grpc/
   
-  grpc.region.redis:
+  redis:
     image: redis@sha256:6cbef353e480a8a6e7f10ec545f13d7d3fa85a212cdcc5ffaf5a1c818b9d3798
     ports:
       - "6379:6379"
@@ -37,9 +39,9 @@ services:
     volumes:
       - grpc_redis_data:/data
  
-  grpc.service.sqlserver:
+  mssql:
     image: mcr.microsoft.com/mssql/server@sha256:db9a8fe3098b7e8bbde41106bdc7caee942e97124e5fdb71b872ca208de3092d
-    container_name: grpc.service.sqlserver
+    container_name: mssql
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}

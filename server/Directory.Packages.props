@@ -39,6 +39,9 @@
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.14.0-beta.2" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.14.0-beta.1" />
+    <PackageVersion Include="RedisRateLimiting" Version="1.2.1" />
+    <PackageVersion Include="RedisRateLimiting.AspNetCore" Version="1.2.1" />
     <PackageVersion Include="Seq.App.OTelMetrics" Version="1.0.0" />
     <PackageVersion Include="Serilog" Version="4.3.1-dev-02395" />
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />

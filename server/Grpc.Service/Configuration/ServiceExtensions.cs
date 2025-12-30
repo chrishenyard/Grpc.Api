@@ -13,6 +13,7 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using StackExchange.Redis;
 using System.Diagnostics;
 
 namespace Grpc.Service.Configuration;
@@ -98,6 +99,13 @@ public static class ServiceExtensions
                 .AddScheme<ApiClientAuthOptions, ApiClientAuthHandler>(ApiClientAuthHandler.SchemeName, options => { })
                 .Services.AddAuthorization();
 
+        services.AddSingleton<IConnectionMultiplexer>(sp =>
+        {
+            var configuration = sp.GetRequiredService<IConfiguration>();
+            var redisConnectionString = configuration.GetConnectionString("Redis");
+            return ConnectionMultiplexer.Connect(redisConnectionString!);
+        });
+
         return services;
     }
 
@@ -119,6 +127,7 @@ public static class ServiceExtensions
             .WithTracing(tracing => tracing
                 .AddAspNetCoreInstrumentation()
                 .AddEntityFrameworkCoreInstrumentation()
+                .AddRedisInstrumentation()
                 .AddOtlpExporter(options =>
                 {
                     options.Endpoint = new Uri(seqSettings.ServerUrl);
@@ -155,4 +164,18 @@ public static class ServiceExtensions
 
         return services;
     }
+
+    //public static IServiceCollection AddRedisRateLimiter(this IServiceCollection services, IConfiguration config)
+    //{
+    //    services.AddRateLimiter(options =>
+    //    {
+    //        options.AddRedisFixedWindowLimiter("per_user_fixed_rate_window_limiter", (opt) =>
+    //        {
+    //            opt.ConnectionMultiplexerFactory = () => connectionMultiplexer;
+    //            opt.PermitLimit = 5;
+    //            // Queue requests when the limit is reached
+    //            //opt.QueueLimit = 5 
+    //        });
+    //    });
+    //}
 }
