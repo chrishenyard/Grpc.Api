@@ -2,8 +2,8 @@
 using Grpc.Core.Interceptors;
 using Grpc.Data.Contracts;
 using Grpc.Service.Attributes;
+using Grpc.Service.Extensions;
 using System.Reflection;
-using System.Security.Claims;
 
 namespace Grpc.Service.Interceptors;
 
@@ -30,7 +30,7 @@ public class ApiGroupAuthInterceptor(
             return await base.UnaryServerHandler(request, context, continuation);
         }
 
-        var apiKey = ResolveApiClientId(httpContext.User);
+        var apiKey = httpContext.User.GetClaim(ApiClaimTypes.ApiKey);
 
         if (apiKey == null)
         {
@@ -40,7 +40,7 @@ public class ApiGroupAuthInterceptor(
                 "Unauthorized"));
         }
 
-        var apiClientGroups = ResolveApiClientGroups(httpContext.User);
+        var apiClientGroups = httpContext.User.GetClaims(ApiClaimTypes.ApiClientGroup);
 
         foreach (var attr in requiredGroups)
         {
@@ -75,7 +75,7 @@ public class ApiGroupAuthInterceptor(
             return;
         }
 
-        var apiKey = ResolveApiClientId(httpContext.User);
+        var apiKey = httpContext.User.GetClaim(ApiClaimTypes.ApiKey);
 
         if (apiKey == null)
         {
@@ -85,7 +85,7 @@ public class ApiGroupAuthInterceptor(
                 "Unauthorized"));
         }
 
-        var apiClientGroups = ResolveApiClientGroups(httpContext.User);
+        var apiClientGroups = httpContext.User.GetClaims(ApiClaimTypes.ApiClientGroup);
 
         foreach (var attr in requiredGroups)
         {
@@ -144,30 +144,5 @@ public class ApiGroupAuthInterceptor(
         //    Can't reliably separate method vs class here, so return them as method-level by convention.
         var endpointAttrs = endpoint.Metadata.GetOrderedMetadata<RequireApiGroupAttribute>().ToArray();
         return (endpointAttrs, Array.Empty<RequireApiGroupAttribute>());
-    }
-
-
-    private static string? ResolveApiClientId(ClaimsPrincipal user)
-    {
-        var apiKey = user.Claims
-            .FirstOrDefault(c => c.Type == ClaimTypes.Name)
-            ?.Value;
-
-        return apiKey;
-    }
-
-    private static List<string> ResolveApiClientGroups(ClaimsPrincipal user)
-    {
-        var groupsClaim = user.Claims
-            .FirstOrDefault(c => c.Type == "api-client-groups")
-            ?.Value;
-
-        if (groupsClaim == null)
-        {
-            return [];
-        }
-
-        var groups = groupsClaim.Split(',', StringSplitOptions.RemoveEmptyEntries);
-        return [.. groups];
     }
 }

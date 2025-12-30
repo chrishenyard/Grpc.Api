@@ -1,6 +1,7 @@
 ﻿using Grpc.Common.Utilities;
 using Grpc.Data.Contracts;
 using Grpc.Service.Attributes;
+using Grpc.Service.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
@@ -89,10 +90,14 @@ public class ApiClientAuthHandler(
 
         var claims = new List<Claim>
         {
-            new("api-client-id", apiClientId.ToString()),
-            new("api-client-groups", string.Join(",", groupNames)),
-            new (ClaimTypes.Name, apiKey)
+            new(ApiClaimTypes.ApiClientId, apiClientId.ToString()),
+            new (ApiClaimTypes.ApiKey, apiKey)
         };
+
+        foreach (var groupName in groupNames)
+        {
+            claims.Add(new Claim(ApiClaimTypes.ApiClientGroup, groupName));
+        }
 
         var identity = new ClaimsIdentity(claims, SchemeName);
         var principal = new ClaimsPrincipal(identity);
