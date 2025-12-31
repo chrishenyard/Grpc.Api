@@ -1,10 +1,13 @@
 ﻿CREATE TABLE [dbo].[ApiClient] (
-    [ApiClientInternalId] BIGINT IDENTITY (1, 1) NOT NULL,
-    [ApiClientId] UNIQUEIDENTIFIER NOT NULL,
-    [ApiKey]      NVARCHAR (100)   NOT NULL,
-    [ClientName]  NVARCHAR (200)   NOT NULL,
-    [IsActive]    BIT              NOT NULL,
-    [CreatedUtc]  DATETIME2 (7)    NOT NULL,
+    [ApiClientInternalId]     BIGINT IDENTITY (1, 1)  NOT NULL,
+    [ApiClientId]             UNIQUEIDENTIFIER        NOT NULL,
+    [ApiKey]                  NVARCHAR (100)          NOT NULL,
+    [ClientName]              NVARCHAR (200)          NOT NULL,
+    [IsActive]                BIT                     NOT NULL,
+    [CreatedUtc]              DATETIME2 (7)           NOT NULL,
+    [RateLimit_PermitLimit]   INT                     NOT NULL,
+    [RateLimit_QueueLimit]    INT                     NOT NULL,
+    [RateLimit_WindowSeconds] INT                     NOT NULL
     CONSTRAINT [PK_ApiClient] PRIMARY KEY NONCLUSTERED ([ApiClientId] ASC)
 );
 GO

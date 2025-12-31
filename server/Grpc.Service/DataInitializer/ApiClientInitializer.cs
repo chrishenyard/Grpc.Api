@@ -30,7 +30,9 @@ public class ApiClientInitializer(
 
             var salt = SecurityHelper.ComputeSalt();
             var apiSecretHash = SecurityHelper.ComputeSecretHash(apiSecret, salt);
-            var apiClientDto = ApiClientDto.Create(apiClientId, apiKey, "Job Admin Group Test Client");
+            var apiClientDto = ApiClientDto
+                    .Create(apiClientId, apiKey, "Job Admin Group Test Client",
+                        new RateLimit { PermitLimit = 10, QueueLimit = 0, WindowSeconds = 60 });
             var apiClientSecretDto = ApiClientSecretDto.Create(apiClientSecretId, apiClientId, salt, apiSecretHash);
 
             await _apiClientRepository.CreateClientAsync(apiClientDto, token);
@@ -52,7 +54,9 @@ public class ApiClientInitializer(
 
             var salt = SecurityHelper.ComputeSalt();
             var apiSecretHash = SecurityHelper.ComputeSecretHash(apiSecret, salt);
-            var apiClientDto = ApiClientDto.Create(apiClientId, apiKey, "Job Reader Group Test Client");
+            var apiClientDto = ApiClientDto
+                .Create(apiClientId, apiKey, "Job Reader Group Test Client",
+                    new RateLimit { PermitLimit = 10, QueueLimit = 0, WindowSeconds = 60 });
             var apiClientSecretDto = ApiClientSecretDto.Create(apiClientSecretId, apiClientId, salt, apiSecretHash);
 
             await _apiClientRepository.CreateClientAsync(apiClientDto, token);
@@ -72,7 +76,10 @@ public class ApiClientInitializer(
 
             var salt = SecurityHelper.ComputeSalt();
             var apiSecretHash = SecurityHelper.ComputeSecretHash(apiSecret, salt);
-            var apiClientDto = ApiClientDto.Create(apiClientId, apiKey, "Job Writer Group Test Client");
+            var apiClientDto = ApiClientDto
+                .Create(apiClientId, apiKey, "Job Writer Group Test Client",
+                    new RateLimit { PermitLimit = 10, QueueLimit = 0, WindowSeconds = 60 });
+
             var apiClientSecretDto = ApiClientSecretDto.Create(apiClientSecretId, apiClientId, salt, apiSecretHash);
 
             await _apiClientRepository.CreateClientAsync(apiClientDto, token);

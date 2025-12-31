@@ -32,7 +32,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" />
   </ItemGroup>
   <ItemGroup>
-	<PreDeploy Include="Scripts\PreDeploy\Drop_Column_IsCurrent.sql" />
+    <Folder Include="Scripts\" />
   </ItemGroup>
 </Project>
 

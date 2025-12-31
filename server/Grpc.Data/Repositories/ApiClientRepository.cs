@@ -83,6 +83,7 @@ public class ApiClientRepository(GrpcDbContext grpcDbContext) : IApiClientReposi
         ArgumentException.ThrowIfNullOrEmpty(apiKey, nameof(apiKey));
 
         var apiClient = await _grpcDbContext.ApiClients
+            .AsNoTracking()
             .FirstOrDefaultAsync(ac => ac.ApiKey == apiKey && ac.IsActive == true, token);
         return apiClient?.ToApiClientDto();
     }
@@ -93,6 +94,7 @@ public class ApiClientRepository(GrpcDbContext grpcDbContext) : IApiClientReposi
 
         var apiClientSecrets = await _grpcDbContext.ApiClientSecrets
             .Include(s => s.ApiClient)
+            .AsNoTracking()
             .Where(s => s.ApiClient.ApiKey == apiKey
                         && s.ApiClient.IsActive
                         && (s.ExpiresUtc == null || s.ExpiresUtc > DateTime.UtcNow))

@@ -22,6 +22,16 @@ public class ApiClient
     public ICollection<ApiClientSecret> ApiClientSecrets { get; set; } = [];
 
     public ICollection<ApiClientGroup> ApiClientGroups { get; set; } = [];
+
+    public RateLimit RateLimit { get; set; } = new();
+}
+
+[ComplexType]
+public sealed class RateLimit
+{
+    public int PermitLimit { get; set; }
+    public int QueueLimit { get; set; }
+    public int WindowSeconds { get; set; }
 }
 
 public sealed record ApiClientDto
@@ -31,10 +41,11 @@ public sealed record ApiClientDto
     public string ClientName { get; init; } = string.Empty;
     public bool IsActive { get; init; }
     public DateTime CreatedUtc { get; init; }
+    public RateLimit RateLimit { get; init; } = new();
 
     private ApiClientDto() { }
 
-    private ApiClientDto(Guid apiClientId, string apiKey, string clientName, bool isActive, DateTime createdUtc)
+    private ApiClientDto(Guid apiClientId, string apiKey, string clientName, bool isActive, DateTime createdUtc, RateLimit rateLimitConfig)
     {
         ValidateOrThrow(apiClientId, apiKey, clientName, createdUtc);
 
@@ -43,26 +54,17 @@ public sealed record ApiClientDto
         ClientName = clientName;
         IsActive = isActive;
         CreatedUtc = createdUtc;
+        RateLimit = rateLimitConfig;
     }
 
-    private ApiClientDto(string apiKey, string clientName, bool isActive, DateTime createdUtc)
-    {
-        ValidateOrThrow(apiKey, clientName, createdUtc);
-
-        ApiKey = apiKey;
-        ClientName = clientName;
-        IsActive = isActive;
-        CreatedUtc = createdUtc;
-    }
-
-    public static ApiClientDto Create(string apiKey, string clientName)
-        => new(apiKey, clientName, true, DateTime.UtcNow);
-
-    public static ApiClientDto Create(Guid apiClientId, string apiKey, string clientName)
-        => new(apiClientId, apiKey, clientName, true, DateTime.UtcNow);
+    public static ApiClientDto Create(Guid apiClientId, string apiKey, string clientName, RateLimit rateLimitConfig)
+        => new(apiClientId, apiKey, clientName, true, DateTime.UtcNow, rateLimitConfig);
 
     public static implicit operator ApiClientDto(ApiClient entity)
-        => new(entity.ApiClientId, entity.ApiKey, entity.ClientName, entity.IsActive, entity.CreatedUtc);
+        => new(entity.ApiClientId, entity.ApiKey, entity.ClientName, entity.IsActive, entity.CreatedUtc, entity.RateLimit)
+        {
+            RateLimit = entity.RateLimit
+        };
 
     public static implicit operator ApiClient(ApiClientDto dto)
         => new()
@@ -71,7 +73,8 @@ public sealed record ApiClientDto
             ApiKey = dto.ApiKey,
             ClientName = dto.ClientName,
             IsActive = dto.IsActive,
-            CreatedUtc = dto.CreatedUtc
+            CreatedUtc = dto.CreatedUtc,
+            RateLimit = dto.RateLimit
         };
 
     private static void ValidateOrThrow(Guid apiClientId, string apiKey, string clientName, DateTime createdUtc)

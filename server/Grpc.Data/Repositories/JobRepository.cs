@@ -28,6 +28,7 @@ public class JobRepository(GrpcDbContext dbContext) : IJobRepository
     public async Task<JobDto?> GetJobByIdAsync(Guid jobId, CancellationToken token)
     {
         var jobDto = await _dbContext.Jobs
+            .AsNoTracking()
             .FirstOrDefaultAsync(j => j.JobId == jobId, token);
         return jobDto?.ToJobDto();
     }
