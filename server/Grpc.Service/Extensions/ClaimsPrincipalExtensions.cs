@@ -29,5 +29,7 @@ public static class ApiClaimTypes
     public const string ApiKey = "ApiKey";
     public const string ApiClientId = "ApiClientId";
     public const string ApiClientGroup = "ApiClientGroup";
-
+    public const string ApiClientPermitLimit = "ApiClientPermitLimit";
+    public const string ApiClientQueueLimit = "ApiClientQueueLimit";
+    public const string ApiClientWindowSeconds = "ApiClientWindowSeconds";
 }

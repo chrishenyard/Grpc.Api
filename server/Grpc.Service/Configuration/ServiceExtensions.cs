@@ -4,6 +4,7 @@ using Grpc.Data.Repositories;
 using Grpc.Data.Settings;
 using Grpc.Service.Authorization;
 using Grpc.Service.DataInitializer;
+using Grpc.Service.RateLimiters;
 using Grpc.Service.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
@@ -165,17 +166,17 @@ public static class ServiceExtensions
         return services;
     }
 
-    //public static IServiceCollection AddRedisRateLimiter(this IServiceCollection services, IConfiguration config)
-    //{
-    //    services.AddRateLimiter(options =>
-    //    {
-    //        options.AddRedisFixedWindowLimiter("per_user_fixed_rate_window_limiter", (opt) =>
-    //        {
-    //            opt.ConnectionMultiplexerFactory = () => connectionMultiplexer;
-    //            opt.PermitLimit = 5;
-    //            // Queue requests when the limit is reached
-    //            //opt.QueueLimit = 5 
-    //        });
-    //    });
-    //}
+    public static IServiceCollection AddRedisRateLimiter(this IServiceCollection services, IConfiguration config)
+    {
+        var redisOptions = ConfigurationOptions.Parse(config.GetConnectionString("Redis")!);
+        var connectionMultiplexer = ConnectionMultiplexer.Connect(redisOptions);
+        services.AddSingleton<IConnectionMultiplexer>(sp => connectionMultiplexer);
+
+        services.AddRateLimiter(options =>
+        {
+            options.AddPolicy<string, ApiClientIdRateLimiterPolicy>("ApiClientRateLimiter");
+        });
+
+        return services;
+    }
 }

@@ -11,7 +11,7 @@ internal class Program
 {
     static async Task<int> Main(string[] args)
     {
-        Env.Load();
+        Env.TraversePath().Load();
 
         var builder = new ConfigurationBuilder();
         builder.SetBasePath(Directory.GetCurrentDirectory())

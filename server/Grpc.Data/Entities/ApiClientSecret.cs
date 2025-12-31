@@ -33,10 +33,11 @@ public sealed record ApiClientSecretDto
     public string Secret { get; init; } = string.Empty;
     public DateTime CreatedUtc { get; init; }
     public DateTime? ExpiresUtc { get; init; }
+    public ApiClient? ApiClient { get; init; }
 
     private ApiClientSecretDto() { }
 
-    private ApiClientSecretDto(Guid apiClientSecretId, Guid apiClientId, string salt, string secret, DateTime createdUtc, DateTime? expiresUtc)
+    private ApiClientSecretDto(Guid apiClientSecretId, Guid apiClientId, string salt, string secret, DateTime createdUtc, DateTime? expiresUtc, ApiClient? apiClient)
     {
         ValidateOrThrow(apiClientSecretId, apiClientId, salt, secret, createdUtc, expiresUtc);
 
@@ -46,26 +47,8 @@ public sealed record ApiClientSecretDto
         Secret = secret;
         CreatedUtc = createdUtc;
         ExpiresUtc = expiresUtc;
+        ApiClient = apiClient;
     }
-
-    private ApiClientSecretDto(Guid apiClientId, string salt, string secret, DateTime createdUtc, DateTime? expiresUtc)
-    {
-        ValidateOrThrow(apiClientId, salt, secret, createdUtc, expiresUtc);
-
-        ApiClientId = apiClientId;
-        Salt = salt;
-        Secret = secret;
-        CreatedUtc = createdUtc;
-        ExpiresUtc = expiresUtc;
-    }
-
-    public static ApiClientSecretDto Create(Guid apiClientId, string salt, string secret)
-        => new(
-            apiClientId,
-            salt,
-            secret,
-            DateTime.UtcNow,
-            null);
 
     public static ApiClientSecretDto Create(Guid apiClientSecretId, Guid apiClientId, string salt, string secret)
         => new(
@@ -74,10 +57,11 @@ public sealed record ApiClientSecretDto
             salt,
             secret,
             DateTime.UtcNow,
+            null,
             null);
 
     public static implicit operator ApiClientSecretDto(ApiClientSecret entity)
-        => new(entity.ApiClientSecretId, entity.ApiClientId, entity.Salt, entity.Secret, entity.CreatedUtc, entity.ExpiresUtc);
+        => new(entity.ApiClientSecretId, entity.ApiClientId, entity.Salt, entity.Secret, entity.CreatedUtc, entity.ExpiresUtc, entity.ApiClient);
 
     public static implicit operator ApiClientSecret(ApiClientSecretDto dto)
         => new()

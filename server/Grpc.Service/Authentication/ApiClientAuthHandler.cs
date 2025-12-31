@@ -91,7 +91,10 @@ public class ApiClientAuthHandler(
         var claims = new List<Claim>
         {
             new(ApiClaimTypes.ApiClientId, apiClientId.ToString()),
-            new (ApiClaimTypes.ApiKey, apiKey)
+            new (ApiClaimTypes.ApiKey, apiKey),
+            new (ApiClaimTypes.ApiClientPermitLimit, apiClientSecretDto.ApiClient!.RateLimit.PermitLimit.ToString()),
+            new (ApiClaimTypes.ApiClientQueueLimit, apiClientSecretDto.ApiClient!.RateLimit.QueueLimit.ToString()),
+            new (ApiClaimTypes.ApiClientWindowSeconds, apiClientSecretDto.ApiClient!.RateLimit.WindowSeconds.ToString()),
         };
 
         foreach (var groupName in groupNames)
