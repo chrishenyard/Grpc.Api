@@ -26,14 +26,21 @@ services:
       seq:
         condition: service_started
       redis:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - grpc_service_logs:/app/logs/grpc/
   
   redis:
     image: redis@sha256:6cbef353e480a8a6e7f10ec545f13d7d3fa85a212cdcc5ffaf5a1c818b9d3798
+    restart: always
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    command: ["redis-server"]
     networks:
       - grpc_service_network
     volumes:

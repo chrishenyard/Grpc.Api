@@ -3,6 +3,7 @@ using Grpc.Core;
 using Grpc.Data.Contracts;
 using Grpc.Data.Entities;
 using Grpc.Service.Attributes;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Grpc.Service.Services;
 
@@ -21,6 +22,7 @@ public class JobService(IJobRepository jobRepository, ILogger<JobService> logger
         "Am I hired? It is decidedly so!"];
 
     [RequireApiGroup("JobWriter")]
+    [EnableRateLimiting("ApiClientRateLimiter")]
     public override async Task<JobResponse> CreateJob(JobCreateRequest request, ServerCallContext context)
     {
         var jobDto = JobDto.Create(request.JobName, request.JobDescription);
@@ -38,6 +40,7 @@ public class JobService(IJobRepository jobRepository, ILogger<JobService> logger
     }
 
     [RequireApiGroup("JobReader")]
+    [EnableRateLimiting("ApiClientRateLimiter")]
     public override async Task GetJobs(JobListOptions options, IServerStreamWriter<JobResponse> responseStream, ServerCallContext context)
     {
         var jobDtos = await _jobRepository.GetJobsAsync(options.Limit, context.CancellationToken);
@@ -59,6 +62,7 @@ public class JobService(IJobRepository jobRepository, ILogger<JobService> logger
     }
 
     [RequireApiGroup("JobReader")]
+    [EnableRateLimiting("ApiClientRateLimiter")]
     public override async Task<JobResponse> GetJob(JobRequest request, ServerCallContext context)
     {
         var jobDto = await _jobRepository.GetJobByIdAsync(Guid.Parse(request.JobId), context.CancellationToken);
@@ -79,6 +83,7 @@ public class JobService(IJobRepository jobRepository, ILogger<JobService> logger
     }
 
     [RequireApiGroup("JobWriter")]
+    [EnableRateLimiting("ApiClientRateLimiter")]
     public override async Task<Empty> DeleteJob(JobRequest request, ServerCallContext context)
     {
         var jobId = Guid.Parse(request.JobId);

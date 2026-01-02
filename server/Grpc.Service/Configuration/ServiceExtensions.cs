@@ -110,7 +110,10 @@ public static class ServiceExtensions
         return services;
     }
 
-    public static IServiceCollection AddTelemetry(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddTelemetry(
+        this IServiceCollection services,
+        IConfiguration config,
+        ConnectionMultiplexer connectionMultiplexer)
     {
         var seqSettings = config.GetSection("SeqSettings")
             .Get<SeqSettings>()!;
@@ -128,7 +131,10 @@ public static class ServiceExtensions
             .WithTracing(tracing => tracing
                 .AddAspNetCoreInstrumentation()
                 .AddEntityFrameworkCoreInstrumentation()
-                .AddRedisInstrumentation()
+                .AddRedisInstrumentation(connectionMultiplexer, options =>
+                {
+                    options.SetVerboseDatabaseStatements = true;
+                })
                 .AddOtlpExporter(options =>
                 {
                     options.Endpoint = new Uri(seqSettings.ServerUrl);
@@ -145,11 +151,11 @@ public static class ServiceExtensions
 
         return services;
     }
-    public static IServiceCollection AddCaching(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddCaching(this IServiceCollection services, ConnectionMultiplexer multiplexer)
     {
         services.AddStackExchangeRedisCache(options =>
         {
-            options.Configuration = config.GetConnectionString("Redis");
+            options.ConnectionMultiplexerFactory = async () => await Task.FromResult(multiplexer);
         });
 
         services.AddHybridCache(options =>
@@ -168,10 +174,6 @@ public static class ServiceExtensions
 
     public static IServiceCollection AddRedisRateLimiter(this IServiceCollection services, IConfiguration config)
     {
-        var redisOptions = ConfigurationOptions.Parse(config.GetConnectionString("Redis")!);
-        var connectionMultiplexer = ConnectionMultiplexer.Connect(redisOptions);
-        services.AddSingleton<IConnectionMultiplexer>(sp => connectionMultiplexer);
-
         services.AddRateLimiter(options =>
         {
             options.AddPolicy<string, ApiClientIdRateLimiterPolicy>("ApiClientRateLimiter");

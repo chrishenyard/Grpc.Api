@@ -5,6 +5,7 @@ using Grpc.Service.Health;
 using Grpc.Service.Interceptors;
 using Grpc.Service.Services;
 using Serilog;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,13 +31,18 @@ builder
 
 var configuration = builder.Configuration;
 
+var redisOptions = ConfigurationOptions.Parse(configuration.GetConnectionString("Redis")!);
+var connectionMultiplexer = ConnectionMultiplexer.Connect(redisOptions);
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp => connectionMultiplexer);
+
 builder.Services
-    .AddTelemetry(configuration)
+    .AddTelemetry(configuration, connectionMultiplexer)
     .AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes: true)
     .AddProblemDetails()
     .AddExceptionHandler<GlobalExceptionHandler>()
     .AddDbContext()
     .AddServices()
+    .AddRedisRateLimiter(configuration)
     .AddHttpContextAccessor()
     .AddGrpc(options =>
     {
@@ -58,6 +64,7 @@ app.UseHttpsRedirection()
     .UseSerilogRequestLogging()
     .UseAuthentication()
     .UseAuthorization()
+    .UseRateLimiter()
     .UseExceptionHandler();
 
 await app.EnsureDatabaseIfDevelopment(app.Lifetime.ApplicationStopping);
