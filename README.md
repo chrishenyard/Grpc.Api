@@ -27,6 +27,10 @@ Key components
   - `Grpc.Service/Protos/jobs.proto` — service contract and message types.
   - MSBuild Proto integration is configured in `Grpc.Service.csproj` (server code generated at build).
 
+- Rate limiting & Authentication:
+  - `Hmac AuthInterceptor` implements HMAC-based authentication for incoming requests.
+  - `RedisRateLimitPartition` provides rate limiting per client. 
+
 - gRPC service:
   - `Grpc.Service.Services.JobService` — Implements the generated `Jobs.JobsBase` service.
 
