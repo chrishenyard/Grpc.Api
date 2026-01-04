@@ -42,6 +42,7 @@ builder.Services
     .AddExceptionHandler<GlobalExceptionHandler>()
     .AddDbContext()
     .AddServices()
+    .AddCaching(connectionMultiplexer, configuration)
     .AddRedisRateLimiter(configuration)
     .AddHttpContextAccessor()
     .AddGrpc(options =>

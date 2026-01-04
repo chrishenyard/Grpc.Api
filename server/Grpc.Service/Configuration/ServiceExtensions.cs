@@ -4,6 +4,7 @@ using Grpc.Data.Repositories;
 using Grpc.Data.Settings;
 using Grpc.Service.Authorization;
 using Grpc.Service.DataInitializer;
+using Grpc.Service.Json;
 using Grpc.Service.RateLimiters;
 using Grpc.Service.Settings;
 using Microsoft.EntityFrameworkCore;
@@ -107,6 +108,11 @@ public static class ServiceExtensions
             return ConnectionMultiplexer.Connect(redisConnectionString!);
         });
 
+        services.AddOptions<HybridCacheSettings>()
+            .BindConfiguration(HybridCacheSettings.Section)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         return services;
     }
 
@@ -151,7 +157,10 @@ public static class ServiceExtensions
 
         return services;
     }
-    public static IServiceCollection AddCaching(this IServiceCollection services, ConnectionMultiplexer multiplexer)
+    public static IServiceCollection AddCaching(
+        this IServiceCollection services,
+        ConnectionMultiplexer multiplexer,
+        IConfiguration configuration)
     {
         services.AddStackExchangeRedisCache(options =>
         {
@@ -160,14 +169,17 @@ public static class ServiceExtensions
 
         services.AddHybridCache(options =>
         {
-            options.MaximumPayloadBytes = 1024 * 1024 * 10;
-            options.MaximumKeyLength = 250;
+            var cacheSettings = configuration.GetSection(HybridCacheSettings.Section).Get<HybridCacheSettings>()
+                ?? new HybridCacheSettings();
+
+            options.MaximumKeyLength = cacheSettings.MaximumKeyLength;
             options.DefaultEntryOptions = new HybridCacheEntryOptions
             {
-                LocalCacheExpiration = TimeSpan.FromMinutes(5),
-                Expiration = TimeSpan.FromMinutes(5)
+                LocalCacheExpiration = TimeSpan.FromMinutes(cacheSettings.LocalCacheExpirationFromMinutes),
+                Expiration = TimeSpan.FromMinutes(cacheSettings.ExpirationFromMinutes)
             };
-        });
+        })
+        .AddSerializerFactory<HybridJsonSerializerFactory>();
 
         return services;
     }

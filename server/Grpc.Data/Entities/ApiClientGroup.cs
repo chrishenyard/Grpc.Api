@@ -17,7 +17,7 @@ public class ApiClientGroupDto
 {
     public Guid ApiClientId { get; init; }
     public int ApiGroupId { get; init; }
-    private ApiClientGroupDto() { }
+    public ApiClientGroupDto() { }
     private ApiClientGroupDto(Guid apiClientId, int apiGroupId)
     {
         ValidateOrThrow(apiClientId, apiGroupId);

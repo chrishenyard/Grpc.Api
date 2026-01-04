@@ -43,7 +43,7 @@ public sealed record ApiClientDto
     public DateTime CreatedUtc { get; init; }
     public RateLimit RateLimit { get; init; } = new();
 
-    private ApiClientDto() { }
+    public ApiClientDto() { }
 
     private ApiClientDto(Guid apiClientId, string apiKey, string clientName, bool isActive, DateTime createdUtc, RateLimit rateLimitConfig)
     {

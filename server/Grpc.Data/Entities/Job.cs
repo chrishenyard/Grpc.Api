@@ -28,7 +28,7 @@ public sealed record JobDto
     public string Description { get; init; } = string.Empty;
     public DateTime CreatedUtc { get; init; }
 
-    private JobDto() { }
+    public JobDto() { }
 
     private JobDto(Guid jobId, string name, bool isActive, string description, DateTime createdUtc)
     {

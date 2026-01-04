@@ -19,7 +19,7 @@ public class ApiGroupDto
 {
     public int ApiGroupId { get; init; }
     public string GroupName { get; init; } = string.Empty;
-    private ApiGroupDto() { }
+    public ApiGroupDto() { }
 
     private ApiGroupDto(int apiGroupId, string groupName)
     {

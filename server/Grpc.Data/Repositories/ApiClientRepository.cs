@@ -2,12 +2,16 @@
 using Grpc.Data.DbContexts;
 using Grpc.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Grpc.Data.Repositories;
 
-public class ApiClientRepository(GrpcDbContext grpcDbContext) : IApiClientRepository
+public class ApiClientRepository(
+    GrpcDbContext grpcDbContext,
+    HybridCache cache) : IApiClientRepository
 {
     private readonly GrpcDbContext _grpcDbContext = grpcDbContext;
+    private readonly HybridCache _cache = cache;
 
     public async Task<ApiClientGroupDto> CreateApiClientGroupAsync(Guid apiClientId, int apiGroupId, CancellationToken token)
     {
@@ -58,52 +62,92 @@ public class ApiClientRepository(GrpcDbContext grpcDbContext) : IApiClientReposi
         return apiClientSecret.ToApiClientSecretDto();
     }
 
-    public Task<List<ApiGroupDto>> GetApiClientGroupsAsync(Guid apiClientId, CancellationToken token)
+    public async Task<List<ApiGroupDto>> GetApiClientGroupsAsync(Guid apiClientId, CancellationToken token)
     {
-        return _grpcDbContext.ApiClientGroups
-            .AsNoTracking()
-            .Include(cg => cg.ApiGroup)
-            .Where(cg => cg.ApiClientId == apiClientId)
-            .Select(cg => cg.ApiGroup.ToApiGroupDto())
-            .ToListAsync(token);
+        var groups = await _cache.GetOrCreateAsync<List<ApiGroupDto>>(
+            $"ApiClientGroups_{apiClientId}",
+            async ct =>
+            {
+                var result = await _grpcDbContext.ApiClientGroups
+                    .AsNoTracking()
+                    .Include(cg => cg.ApiGroup)
+                    .Where(cg => cg.ApiClientId == apiClientId)
+                    .Select(cg => cg.ApiGroup.ToApiGroupDto())
+                    .ToListAsync(ct);
+
+                return result;
+            },
+            tags: ["api", "client", "groups"],
+            cancellationToken: token);
+
+        return groups;
     }
 
     public async Task<ApiGroupDto?> GetApiGroupByNameAsync(string groupName, CancellationToken token)
     {
         ArgumentException.ThrowIfNullOrEmpty(groupName, nameof(groupName));
 
-        var apiGroup = await _grpcDbContext.ApiGroups
-            .FirstOrDefaultAsync(ag => ag.GroupName == groupName, token);
+        var apiGroup = await _cache.GetOrCreateAsync<ApiGroupDto?>(
+            $"ApiGroup_{groupName}",
+            async ct =>
+            {
+                var result = await _grpcDbContext.ApiGroups
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(ag => ag.GroupName == groupName, ct);
 
-        return apiGroup?.ToApiGroupDto();
+                return result?.ToApiGroupDto();
+            },
+            tags: ["apigroup"],
+            cancellationToken: token);
+
+        return apiGroup;
     }
 
     public async Task<ApiClientDto?> GetClientByApiKeyAsync(string apiKey, CancellationToken token)
     {
         ArgumentException.ThrowIfNullOrEmpty(apiKey, nameof(apiKey));
 
-        var apiClient = await _grpcDbContext.ApiClients
-            .AsNoTracking()
-            .FirstOrDefaultAsync(ac => ac.ApiKey == apiKey && ac.IsActive == true, token);
-        return apiClient?.ToApiClientDto();
+        var apiClient = await _cache.GetOrCreateAsync<ApiClientDto?>(
+            $"ApiClient_{apiKey}",
+            async ct =>
+            {
+                var result = await _grpcDbContext.ApiClients
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(ac => ac.ApiKey == apiKey && ac.IsActive == true, ct);
+
+                return result?.ToApiClientDto();
+            },
+            tags: ["api", "client"],
+            cancellationToken: token);
+
+        return apiClient;
     }
 
     public async Task<List<ApiClientSecretDto>> GetCurrentSecretAsync(string apiKey, CancellationToken token)
     {
         ArgumentException.ThrowIfNullOrEmpty(apiKey, nameof(apiKey));
 
-        var apiClientSecrets = await _grpcDbContext.ApiClientSecrets
-            .Include(s => s.ApiClient)
-            .AsNoTracking()
-            .Where(s => s.ApiClient.ApiKey == apiKey
-                        && s.ApiClient.IsActive
-                        && (s.ExpiresUtc == null || s.ExpiresUtc > DateTime.UtcNow))
-            .ToListAsync(token);
+        var apiClientSecrets = await _cache.GetOrCreateAsync<List<ApiClientSecretDto>>(
+            $"ApiClientSecrets_{apiKey}",
+            async ct =>
+            {
+                var secrets = await _grpcDbContext.ApiClientSecrets
+                    .Include(s => s.ApiClient)
+                    .AsNoTracking()
+                    .Where(s => s.ApiClient.ApiKey == apiKey
+                                && s.ApiClient.IsActive
+                                && (s.ExpiresUtc == null || s.ExpiresUtc > DateTime.UtcNow))
+                    .ToListAsync(ct);
 
-        var dtos = apiClientSecrets
-            .Select(s => s.ToApiClientSecretDto())
-            .ToList();
+                var dtos = secrets
+                    .Select(s => s.ToApiClientSecretDto())
+                    .ToList();
 
-        return dtos;
+                return dtos;
+            },
+            tags: ["api", "client", "secrets"],
+            cancellationToken: token);
+
+        return apiClientSecrets;
     }
 }

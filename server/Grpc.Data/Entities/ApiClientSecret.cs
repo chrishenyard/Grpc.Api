@@ -35,7 +35,7 @@ public sealed record ApiClientSecretDto
     public DateTime? ExpiresUtc { get; init; }
     public ApiClient? ApiClient { get; init; }
 
-    private ApiClientSecretDto() { }
+    public ApiClientSecretDto() { }
 
     private ApiClientSecretDto(Guid apiClientSecretId, Guid apiClientId, string salt, string secret, DateTime createdUtc, DateTime? expiresUtc, ApiClient? apiClient)
     {
