@@ -5,6 +5,7 @@
     <File Path="Docker-Compose-Down.ps1" />
     <File Path="Docker-Compose-Up.ps1" />
     <File Path="LICENSE" />
+    <File Path="nuget.config" />
     <File Path="Publish-Database.ps1" />
     <File Path="README.md" />
     <File Path="server/Directory.Packages.props" />
